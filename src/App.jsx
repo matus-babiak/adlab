@@ -10,8 +10,8 @@ import ScenareSkalovania from './pages/ScenareSkalovania';
 
 export default function App() {
   return (
-    <Layout>
-      <Routes>
+    <Routes>
+      <Route element={<Layout />}>
         <Route path="/" element={<Index />} />
         <Route path="/roas" element={<RoasKalkulacka />} />
         <Route path="/optimalizator-rozpoctu" element={<OptimalizatorRozpoctu />} />
@@ -19,7 +19,7 @@ export default function App() {
         <Route path="/pacing-scenare" element={<PacingScenare />} />
         <Route path="/unava-kreativ" element={<UnavaKreativ />} />
         <Route path="/scenare-skalovania" element={<ScenareSkalovania />} />
-      </Routes>
-    </Layout>
+      </Route>
+    </Routes>
   );
 }

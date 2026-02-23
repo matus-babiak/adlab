@@ -51,7 +51,7 @@ export default function Layout() {
         </div>
       </header>
 
-      <main className="flex-1 w-full min-h-0">
+      <main className="flex-1 w-full min-h-[60vh]">
         <div className="w-full min-h-full">
           <Outlet />
         </div>
