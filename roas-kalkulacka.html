@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="sk" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ROAS Kalkulačka - PPC Analytics</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        background: '#000000',
+                        foreground: '#ffffff',
+                        primary: '#FFD700',
+                        'primary-foreground': '#000000',
+                        secondary: '#1a1a1a',
+                        'secondary-foreground': '#ffffff',
+                        accent: '#00FF80',
+                        'accent-foreground': '#000000',
+                        muted: '#262626',
+                        'muted-foreground': '#b0b0b0',
+                        card: '#121212',
+                        'card-foreground': '#ffffff',
+                        border: '#262626',
+                        input: '#262626',
+                        ring: '#FFD700',
+                        destructive: '#FF6B4A',
+                        'destructive-foreground': '#ffffff'
+                    },
+                    fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
+                    borderRadius: { 'lg': '1rem', 'md': 'calc(1rem - 2px)', 'sm': 'calc(1rem - 4px)' }
+                }
+            }
+        }
+    </script>
+    <style>
+        :root {
+            --primary: 45 100% 60%;
+            --background: 0 0% 0%;
+            --foreground: 0 0% 100%;
+            --card: 0 0% 7%;
+            --border: 0 0% 15%;
+            --radius: 1rem;
+        }
+        body { font-family: 'Inter', system-ui, sans-serif; -webkit-font-smoothing: antialiased; line-height: 1.3; }
+        .glass-card {
+            background: rgba(18, 18, 18, 0.8);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(38, 38, 38, 0.5);
+        }
+        .glass-card:hover { border-color: rgba(255, 215, 0, 0.3); transition: border-color 0.3s ease; }
+        .text-gradient {
+            background: linear-gradient(135deg, hsl(45 100% 60%), hsl(35 100% 65%));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .glow-gold { box-shadow: 0 0 40px -10px rgba(255, 215, 0, 0.3); }
+        .animate-in-view { opacity: 0; transform: translateY(24px); transition: opacity 0.6s ease-out, transform 0.6s ease-out; }
+        .animate-in-view.in-view { opacity: 1; transform: translateY(0); }
+        @media (prefers-reduced-motion: reduce) {
+            .animate-in-view { transition: none; opacity: 1; transform: none; }
+            .animate-in-view.in-view { opacity: 1; transform: none; }
+        }
+        input:focus-visible, button:focus-visible { outline: none; }
+        .focus-ring:focus-visible { box-shadow: 0 0 0 2px #000, 0 0 0 4px #FFD700; }
+    </style>
+</head>
+<body class="bg-background text-foreground min-h-screen flex flex-col">
+    <!-- Header -->
+    <header class="bg-background border-b border-border/30 sticky top-0 z-40">
+        <div class="max-w-6xl mx-auto py-3 px-3 sm:py-5 sm:px-6 md:py-6 flex flex-row items-center justify-between gap-2 sm:gap-4">
+            <div class="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
+                <a href="index.html" class="inline-flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors text-sm font-medium focus-ring rounded-md px-2 py-1 -ml-2">
+                    <span aria-hidden="true">←</span>
+                    Všetky kalkulačky
+                </a>
+            </div>
+            <a href="index.html" class="flex items-center gap-3 sm:gap-4 min-w-0">
+                <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-primary/10 ring-2 ring-primary/50 shrink-0 flex items-center justify-center">
+                    <span class="text-lg" aria-hidden="true">📊</span>
+                </div>
+                <div class="min-w-0 hidden sm:block">
+                    <div class="font-bold text-foreground leading-tight truncate text-sm">PPC Analytics</div>
+                    <div class="text-xs text-muted-foreground truncate">ROAS</div>
+                </div>
+            </a>
+        </div>
+    </header>
+
+    <main class="flex-1">
+        <!-- Page title -->
+        <section class="pt-12 pb-8 md:pt-16 md:pb-12">
+            <div class="max-w-4xl mx-auto px-4 sm:px-6">
+                <h1 class="text-3xl sm:text-4xl md:text-5xl font-black leading-tight tracking-tight mb-2">
+                    <span class="text-gradient">ROAS</span> kalkulačka
+                </h1>
+                <p class="text-muted-foreground leading-relaxed">
+                    Zadajte náklady na reklamu a príjem z reklamy. Kalkulačka zobrazí ROAS, zisk/stratu a odporúčania.
+                </p>
+            </div>
+        </section>
+
+        <!-- Calculator -->
+        <section class="py-8 md:py-12" aria-labelledby="calc-heading">
+            <div class="max-w-4xl mx-auto px-4 sm:px-6">
+                <div class="glass-card rounded-2xl p-8 md:p-10 animate-in-view">
+                    <h2 id="calc-heading" class="sr-only">ROAS kalkulačka</h2>
+
+                    <div class="mb-8">
+                        <h3 class="text-sm font-semibold uppercase tracking-widest text-muted-foreground mb-6">Vstupné hodnoty</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="space-y-2">
+                                <label for="rc-cost" class="block text-sm font-semibold">Náklady na reklamu</label>
+                                <div class="relative">
+                                    <input
+                                        type="number"
+                                        id="rc-cost"
+                                        placeholder="0,00"
+                                        min="0"
+                                        step="0.01"
+                                        class="w-full px-4 py-3 pr-12 rounded-xl bg-secondary border border-input text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background transition-all text-base md:text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                                        aria-describedby="rc-cost-hint"
+                                    >
+                                    <span class="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">€</span>
+                                </div>
+                                <span id="rc-cost-hint" class="text-xs text-muted-foreground">Celkové výdavky na reklamu</span>
+                            </div>
+                            <div class="space-y-2">
+                                <label for="rc-rev" class="block text-sm font-semibold">Príjem z reklamy</label>
+                                <div class="relative">
+                                    <input
+                                        type="number"
+                                        id="rc-rev"
+                                        placeholder="0,00"
+                                        min="0"
+                                        step="0.01"
+                                        class="w-full px-4 py-3 pr-12 rounded-xl bg-secondary border border-input text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background transition-all text-base md:text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                                        aria-describedby="rc-rev-hint"
+                                    >
+                                    <span class="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">€</span>
+                                </div>
+                                <span id="rc-rev-hint" class="text-xs text-muted-foreground">Príjmy priraditeľné k reklame</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-8">
+                        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8">
+                            <div class="space-y-4">
+                                <div class="text-sm font-semibold uppercase tracking-wider text-muted-foreground">ROAS</div>
+                                <div id="rc-roas-val" class="text-4xl md:text-5xl font-black tracking-tight text-foreground" aria-live="polite">—</div>
+                                <div id="rc-chip" class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-semibold" style="display:none" aria-live="polite">
+                                    <span id="rc-chip-icon" aria-hidden="true"></span>
+                                    <span id="rc-chip-label"></span>
+                                </div>
+                            </div>
+                            <div class="flex flex-col items-center space-y-4" aria-hidden="true">
+                                <div class="relative">
+                                    <svg class="w-32 h-20 sm:w-40 sm:h-24" viewBox="0 0 80 48" id="rc-gauge-svg" role="img" aria-labelledby="gauge-label">
+                                        <defs>
+                                            <linearGradient id="gauge-grad" x1="0" y1="0" x2="1" y2="0">
+                                                <stop offset="0%" stop-color="#FF6B4A"/>
+                                                <stop offset="33%" stop-color="#FFA500"/>
+                                                <stop offset="67%" stop-color="#00FF80"/>
+                                                <stop offset="100%" stop-color="#00FF80"/>
+                                            </linearGradient>
+                                        </defs>
+                                        <path id="gauge-track" d="" fill="none" stroke="#262626" stroke-width="6" stroke-linecap="round"/>
+                                        <path id="gauge-fill" d="" fill="none" stroke="url(#gauge-grad)" stroke-width="6" stroke-linecap="round"/>
+                                        <line id="gauge-needle" x1="40" y1="44" x2="40" y2="44" stroke="#ffffff" stroke-width="2" stroke-linecap="round" opacity="0"/>
+                                        <circle cx="40" cy="44" r="2" fill="#ffffff" id="gauge-dot" opacity="0"/>
+                                    </svg>
+                                </div>
+                                <div id="gauge-label" class="text-sm text-muted-foreground font-medium">Zadajte hodnoty</div>
+                            </div>
+                        </div>
+
+                        <div class="space-y-3">
+                            <div class="flex justify-between text-xs text-muted-foreground">
+                                <span>0%</span>
+                                <span>400% breakeven</span>
+                                <span>800% cieľ</span>
+                            </div>
+                            <div class="h-2 bg-muted rounded-full overflow-hidden" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" aria-label="ROAS progress">
+                                <div id="rc-bar" class="h-full transition-all duration-500 ease-out" style="width:0%; background: #262626"></div>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-6 p-6 bg-secondary/50 rounded-xl">
+                            <div class="text-center">
+                                <div class="text-sm text-muted-foreground mb-1">Zisk / Strata</div>
+                                <div id="rc-profit" class="text-xl font-bold" aria-live="polite">—</div>
+                            </div>
+                            <div class="text-center">
+                                <div class="text-sm text-muted-foreground mb-1">Výnos za 1 €</div>
+                                <div id="rc-per-euro" class="text-xl font-bold" aria-live="polite">—</div>
+                            </div>
+                        </div>
+
+                        <div id="rc-msg" class="hidden p-6 rounded-xl" aria-live="polite"></div>
+                        <p id="rc-hint" class="text-center text-muted-foreground text-sm">Zadajte náklady a príjem pre výpočet</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="py-12 border-t border-border/30">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6">
+            <div class="flex flex-wrap items-center justify-between gap-4">
+                <a href="index.html" class="text-sm text-muted-foreground hover:text-primary transition-colors underline-offset-4 hover:underline">
+                    ← Všetky kalkulačky
+                </a>
+                <p class="text-sm text-muted-foreground">© 2025 PPC Analytics</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        (function () {
+            var observer = new IntersectionObserver(function (entries) {
+                entries.forEach(function (entry) {
+                    if (entry.isIntersecting) entry.target.classList.add('in-view');
+                });
+            }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+            document.querySelectorAll('.animate-in-view').forEach(function (el) { observer.observe(el); });
+        })();
+
+        (function () {
+            var costEl = document.getElementById('rc-cost');
+            var revEl = document.getElementById('rc-rev');
+            var roasEl = document.getElementById('rc-roas-val');
+            var chipEl = document.getElementById('rc-chip');
+            var chipIcon = document.getElementById('rc-chip-icon');
+            var chipLabel = document.getElementById('rc-chip-label');
+            var profitEl = document.getElementById('rc-profit');
+            var perEuroEl = document.getElementById('rc-per-euro');
+            var barEl = document.getElementById('rc-bar');
+            var progressBar = barEl && barEl.parentElement;
+            var msgEl = document.getElementById('rc-msg');
+            var hintEl = document.getElementById('rc-hint');
+            var gTrack = document.getElementById('gauge-track');
+            var gFill = document.getElementById('gauge-fill');
+            var gNeedle = document.getElementById('gauge-needle');
+            var gDot = document.getElementById('gauge-dot');
+            var gLabel = document.getElementById('gauge-label');
+
+            var CX = 40, CY = 44, R = 34, START_ANG = -200, END_ANG = 20;
+
+            function polarToXY(angleDeg, r) {
+                var a = (angleDeg * Math.PI) / 180;
+                return { x: CX + r * Math.cos(a), y: CY + r * Math.sin(a) };
+            }
+            function arcPath(startDeg, endDeg, r) {
+                var s = polarToXY(startDeg, r);
+                var e = polarToXY(endDeg, r);
+                var large = Math.abs(endDeg - startDeg) > 180 ? 1 : 0;
+                return 'M ' + s.x + ' ' + s.y + ' A ' + r + ' ' + r + ' 0 ' + large + ' 1 ' + e.x + ' ' + e.y;
+            }
+            if (gTrack) gTrack.setAttribute('d', arcPath(START_ANG, END_ANG, R));
+
+            function setGauge(pct) {
+                var angleDeg = START_ANG + pct * (END_ANG - START_ANG);
+                gFill.setAttribute('d', arcPath(START_ANG, angleDeg, R));
+                var tip = polarToXY(angleDeg, R - 10);
+                gNeedle.setAttribute('x2', tip.x);
+                gNeedle.setAttribute('y2', tip.y);
+                gNeedle.setAttribute('opacity', '1');
+                gDot.setAttribute('opacity', '1');
+            }
+            function resetGauge() {
+                gFill.setAttribute('d', '');
+                gNeedle.setAttribute('opacity', '0');
+                gDot.setAttribute('opacity', '0');
+                if (gLabel) gLabel.textContent = 'Zadajte hodnoty';
+            }
+            function fmtEur(n) {
+                var formatted = Math.abs(n).toLocaleString('sk-SK', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                return (n < 0 ? '−' : '') + formatted + ' €';
+            }
+            function fmtPct(n) {
+                return n.toLocaleString('sk-SK', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + ' %';
+            }
+            function updateProgressBar(valuenow, barColor) {
+                if (progressBar) progressBar.setAttribute('aria-valuenow', Math.round(valuenow));
+                if (barEl) {
+                    barEl.style.width = Math.min(100, valuenow) + '%';
+                    barEl.style.background = barColor;
+                }
+            }
+
+            function calculate() {
+                var cost = parseFloat(costEl.value) || 0;
+                var rev = parseFloat(revEl.value) || 0;
+
+                if (cost <= 0) {
+                    roasEl.textContent = '—';
+                    roasEl.className = 'text-4xl md:text-5xl font-black tracking-tight text-foreground';
+                    chipEl.style.display = 'none';
+                    profitEl.textContent = '—';
+                    profitEl.className = 'text-xl font-bold';
+                    perEuroEl.textContent = '—';
+                    perEuroEl.className = 'text-xl font-bold';
+                    updateProgressBar(0, '#262626');
+                    msgEl.classList.add('hidden');
+                    msgEl.className = 'hidden p-6 rounded-xl';
+                    msgEl.innerHTML = '';
+                    hintEl.style.display = 'block';
+                    resetGauge();
+                    return;
+                }
+                hintEl.style.display = 'none';
+
+                var roas = (rev / cost) * 100;
+                var profit = rev - cost;
+                var perEur = rev / cost;
+
+                roasEl.textContent = fmtPct(roas);
+                profitEl.textContent = fmtEur(profit);
+                perEuroEl.textContent = fmtEur(perEur);
+
+                var gaugePct = Math.min(1, roas / 1200);
+                setGauge(gaugePct);
+                gLabel.textContent = fmtPct(roas);
+
+                var barPct = Math.min(100, (roas / 1200) * 100);
+                var barColor, colorClass, icon, label, summary, tips;
+
+                if (roas >= 1000) {
+                    colorClass = 'text-accent';
+                    icon = '🌟';
+                    label = 'Výborné';
+                    barColor = '#00FF80';
+                    summary = '<strong class="text-accent font-bold">Vynikajúce ROAS!</strong> Vaša reklama je vysoko zisková. Za každé 1 € investované získavate viac ako 10 €. Škálujte agresívne.';
+                    tips = ['Škálujte úspešné kampane navýšením rozpočtu o 20–50 %', 'Testujte lookalike auditóriá podľa najlepších konvertorov', 'Zdokumentujte si stratégiu a replikujte ju do nových kampaní', 'Zvážte expanziu do nových kanálov (YouTube, Pinterest)', 'Nastavte automatický bidding pre stabilizáciu výkonu'];
+                } else if (roas >= 800) {
+                    colorClass = 'text-accent';
+                    icon = '✅';
+                    label = 'Dobré';
+                    barColor = '#00FF80';
+                    summary = '<strong class="text-accent font-bold">Dobré ROAS!</strong> Kampane sú ziskové a stabilné. Za každé 1 € získate ' + fmtEur(perEur) + '.';
+                    tips = ['A/B testujte reklamné kreativy pre posun nad 1000 %', 'Optimalizujte landing page pre zvýšenie konverzného pomeru', 'Pridajte remarketingové kampane pre vracajúcich sa zákazníkov', 'Analyzujte výkonnosť podľa zariadení a časových segmentov', 'Zvážte navýšenie rozpočtu o 10–20 %'];
+                } else if (roas >= 400) {
+                    colorClass = 'text-primary';
+                    icon = '⚠️';
+                    label = 'Priemerné';
+                    barColor = '#FFD700';
+                    summary = '<strong class="text-primary font-bold">ROAS ' + fmtPct(roas) + '.</strong> Nad breakevenom, no pod cieľom. Kampane zarábajú, ale rezerva je nízka. Optimalizujte pred škálovaním.';
+                    tips = ['Zúžte targeting — zamerajte sa na kvalitnejšie auditóriá', 'Otestujte nové reklamné texty a výzvy k akcii', 'Vylepšite produktové stránky a rýchlosť načítania', 'Pozastavte podvýkonné skupiny reklám', 'Analyzujte odchodové body v konverznom funneli'];
+                } else {
+                    colorClass = 'text-destructive';
+                    icon = '🚫';
+                    label = 'Slabé';
+                    barColor = '#FF6B4A';
+                    summary = '<strong class="text-destructive font-bold">ROAS ' + fmtPct(roas) + ' — pod breakevenom.</strong> Kampane strácajú peniaze. Okamžite zredukujte výdavky a prehodnoťte stratégiu.';
+                    tips = ['Okamžite pozastavte alebo obmedzte neúčinné kampane', 'Overte správnosť nastavenia conversion trackingu', 'Prehodnoťte cieľové auditóriá od základov', 'Testujte nové reklamné formáty s malým rozpočtom', 'Zvážte konzultáciu s PPC špecialistom', 'Porovnajte sa s odvetvovými benchmarkmi'];
+                }
+
+                updateProgressBar(barPct, barColor);
+                roasEl.className = 'text-4xl md:text-5xl font-black tracking-tight ' + colorClass;
+                profitEl.className = 'text-xl font-bold ' + (profit >= 0 ? 'text-accent' : 'text-destructive');
+                chipEl.className = 'inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-semibold ' +
+                    (roas >= 800 ? 'bg-accent/10 text-accent' : roas >= 400 ? 'bg-primary/10 text-primary' : 'bg-destructive/10 text-destructive');
+                chipEl.style.display = 'inline-flex';
+                chipIcon.textContent = icon;
+                chipLabel.textContent = label;
+
+                var tipsHtml = '<div class="mt-6"><h4 class="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-4">Odporúčania</h4><ul class="space-y-2 text-sm text-foreground">' +
+                    tips.map(function (t) { return '<li class="flex items-start gap-2"><span class="text-muted-foreground mt-1">•</span><span>' + t + '</span></li>'; }).join('') + '</ul></div>';
+                msgEl.className = 'block p-6 rounded-xl ' +
+                    (roas >= 800 ? 'bg-accent/5 border border-accent/20' : roas >= 400 ? 'bg-primary/5 border border-primary/20' : 'bg-destructive/5 border border-destructive/20');
+                msgEl.innerHTML = '<p class="leading-relaxed">' + summary + '</p>' + tipsHtml;
+                msgEl.style.display = 'block';
+            }
+
+            costEl.addEventListener('input', calculate);
+            revEl.addEventListener('input', calculate);
+            calculate();
+        })();
+    </script>
+</body>
+</html>
