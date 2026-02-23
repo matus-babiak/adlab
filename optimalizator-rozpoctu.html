@@ -101,9 +101,9 @@
         .budget-row {
             display: grid;
             grid-template-columns: 1fr;
-            gap: 1rem;
+            gap: 1.25rem;
         }
-        @media (min-width: 640px) { .budget-row { grid-template-columns: repeat(3, 1fr); } }
+        @media (min-width: 640px) { .budget-row { grid-template-columns: repeat(3, 1fr); gap: 1.5rem; } }
         .field-group label {
             display: block;
             font-size: 0.875rem;
@@ -119,6 +119,7 @@
             background: #1a1a1a;
             color: #fff;
             font-size: 1rem;
+            min-width: 0;
         }
         .field-group input:focus {
             outline: none;
@@ -128,39 +129,45 @@
 
         .campaigns-header {
             display: grid;
-            grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 40px;
-            gap: 0.5rem;
-            padding: 0.75rem 0;
-            font-size: 0.75rem;
+            grid-template-columns: minmax(100px, 1.4fr) minmax(70px, 1fr) minmax(70px, 1fr) minmax(60px, 0.9fr) minmax(50px, 0.8fr) minmax(70px, 0.9fr) 48px;
+            gap: 0.75rem 1rem;
+            padding: 1rem 0;
+            font-size: 0.7rem;
             font-weight: 600;
             text-transform: uppercase;
-            letter-spacing: 0.05em;
+            letter-spacing: 0.04em;
             color: rgb(176, 176, 176);
             border-bottom: 1px solid rgba(38, 38, 38, 0.5);
         }
-        @media (max-width: 900px) {
+        @media (max-width: 1024px) {
             .campaigns-header { display: none; }
         }
         .campaign-row {
             display: grid;
-            grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 40px;
-            gap: 0.5rem;
+            grid-template-columns: minmax(100px, 1.4fr) minmax(70px, 1fr) minmax(70px, 1fr) minmax(60px, 0.9fr) minmax(50px, 0.8fr) minmax(70px, 0.9fr) 48px;
+            gap: 0.75rem 1rem;
             align-items: center;
-            padding: 0.5rem 0;
+            padding: 0.75rem 0;
             border-bottom: 1px solid rgba(38, 38, 38, 0.3);
         }
-        @media (max-width: 900px) {
+        @media (max-width: 1024px) {
             .campaign-row {
-                grid-template-columns: 1fr 1fr 1fr 40px;
-                grid-template-areas: "name name name remove" "spent revenue impressions remove" "purchases cpp . remove";
+                grid-template-columns: 1.5fr 1fr 1fr 1fr 48px;
+                grid-template-rows: auto auto;
+                gap: 0.75rem 1rem;
+                padding: 1rem;
+                margin-bottom: 0.75rem;
+                background: rgba(26, 26, 26, 0.25);
+                border: 1px solid rgba(38, 38, 38, 0.4);
+                border-radius: 0.75rem;
             }
-            .campaign-row .name-col { grid-area: name; }
-            .campaign-row input:nth-of-type(2) { grid-area: spent; }
-            .campaign-row input:nth-of-type(3) { grid-area: revenue; }
-            .campaign-row input:nth-of-type(4) { grid-area: impressions; }
-            .campaign-row input:nth-of-type(5) { grid-area: purchases; }
-            .campaign-row input:nth-of-type(6) { grid-area: cpp; }
-            .campaign-row .btn-remove { grid-area: remove; }
+            .campaign-row .name-col { order: 1; grid-column: 1 / 3; grid-row: 1; }
+            .campaign-row input:nth-of-type(2) { order: 2; grid-column: 3; grid-row: 1; }
+            .campaign-row input:nth-of-type(3) { order: 3; grid-column: 4; grid-row: 1; }
+            .campaign-row .btn-remove { order: 4; grid-column: 5; grid-row: 1 / 3; align-self: center; }
+            .campaign-row input:nth-of-type(4) { order: 5; grid-column: 1; grid-row: 2; }
+            .campaign-row input:nth-of-type(5) { order: 6; grid-column: 2; grid-row: 2; }
+            .campaign-row input:nth-of-type(6) { order: 7; grid-column: 3; grid-row: 2; }
         }
         .campaign-row input {
             padding: 0.5rem 0.75rem;
@@ -169,6 +176,8 @@
             background: #1a1a1a;
             color: #fff;
             font-size: 0.875rem;
+            width: 100%;
+            min-width: 0;
         }
         .campaign-row input:focus {
             outline: none;
@@ -176,8 +185,9 @@
         }
         .campaign-row .name-col { min-width: 0; }
         .btn-remove {
-            width: 2rem;
-            height: 2rem;
+            width: 2.5rem;
+            height: 2.5rem;
+            min-width: 2.5rem;
             border-radius: 0.5rem;
             border: 1px solid #262626;
             background: transparent;
@@ -186,6 +196,7 @@
             line-height: 1;
             cursor: pointer;
             transition: color 0.2s, border-color 0.2s, background 0.2s;
+            flex-shrink: 0;
         }
         .btn-remove:hover:not(:disabled) {
             color: #FF6B4A;
@@ -194,12 +205,13 @@
         }
         .btn-remove:disabled { cursor: not-allowed; opacity: 0.3; }
 
+        #campaigns-container { margin-top: 0.5rem; }
         .campaigns-actions {
             display: flex;
             flex-wrap: wrap;
-            gap: 0.75rem;
-            margin-top: 1.25rem;
-            padding-top: 1rem;
+            gap: 1rem;
+            margin-top: 1.5rem;
+            padding-top: 1.25rem;
             border-top: 1px solid rgba(38, 38, 38, 0.3);
         }
         .btn {
@@ -361,23 +373,23 @@
                     <p>Inteligentné prerozdelenie budgetu pre maximálny ROAS</p>
                 </div>
 
-                <div class="card animate-in-view">
+                <form id="global-settings-form" class="card animate-in-view" novalidate>
                     <div class="card-title">Globálne nastavenia</div>
                     <div class="budget-row">
                         <div class="field-group">
-                            <label for="total-budget">Celkový mesačný rozpočet (€)</label>
-                            <input type="number" id="total-budget" placeholder="napr. 5000" min="0" step="1">
+                            <label for="total-budget">Celkový mesačný rozpočet (€) <span class="text-muted-foreground font-normal">*</span></label>
+                            <input type="number" id="total-budget" placeholder="napr. 5000" min="0" step="1" required aria-required="true">
                         </div>
                         <div class="field-group">
-                            <label for="breakeven-roas">Breakeven ROAS (%)</label>
-                            <input type="number" id="breakeven-roas" value="400" min="100" step="10">
+                            <label for="breakeven-roas">Breakeven ROAS (%) <span class="text-muted-foreground font-normal">*</span></label>
+                            <input type="number" id="breakeven-roas" placeholder="napr. 400" min="100" step="10" required aria-required="true">
                         </div>
                         <div class="field-group">
-                            <label for="target-roas">Cieľový ROAS (%)</label>
-                            <input type="number" id="target-roas" value="800" min="100" step="10">
+                            <label for="target-roas">Cieľový ROAS (%) <span class="text-muted-foreground font-normal">*</span></label>
+                            <input type="number" id="target-roas" placeholder="napr. 800" min="100" step="10" required aria-required="true">
                         </div>
                     </div>
-                </div>
+                </form>
 
                 <div class="card animate-in-view">
                     <div class="card-title">Kampane</div>
@@ -506,10 +518,14 @@
         }
 
         function calculate() {
+            var form = document.getElementById('global-settings-form');
+            if (form && !form.reportValidity()) return;
+
             var campaigns = getCampaigns();
             var totalBudgetIn = parseFloat(document.getElementById('total-budget').value) || 0;
-            var breakevenRoas = parseFloat(document.getElementById('breakeven-roas').value) || 400;
-            var targetRoas = parseFloat(document.getElementById('target-roas').value) || 800;
+            var breakevenRoas = parseFloat(document.getElementById('breakeven-roas').value);
+            var targetRoas = parseFloat(document.getElementById('target-roas').value);
+            if (isNaN(breakevenRoas) || isNaN(targetRoas) || breakevenRoas <= 0 || targetRoas <= 0) return;
 
             if (!campaigns.some(function(c) { return c.spent > 0 && c.revenue > 0; })) return;
 
